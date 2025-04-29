@@ -95,6 +95,27 @@ switch ($action) {
             include PATH_VIEWS .'v_etatFraisComptable.php';
         }
         break;
+    case 'refuserFrais':
+        if (isset($_POST['visiteur'], $_POST['mois'], $_POST['idFrais'])) {
+            $visiteurLogin = $_POST['visiteur'];
+            $mois = $_POST['mois'];
+            $idFrais = $_POST['idFrais'];
+
+            $visiteurId = $pdo->getVisiteurId($visiteurLogin);
+
+            if ($visiteurId) {
+                $pdo->refuserFraisHorsForfait($visiteurId, $mois, $idFrais);
+
+                $lesFraisForfait = $pdo->getLesFraisForfait($visiteurId, $mois);
+                $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($visiteurId, $mois);
+
+                include PATH_VIEWS . 'v_etatFraisComptable.php';
+            } else {
+                $messageErreur = "Visiteur invalide.";
+                include PATH_VIEWS . 'v_erreurs.php';
+            }
+        }
+        break;
     case 'genererPDF':
         if (isset($_POST['visiteur'], $_POST['mois'])) {
             $visiteurId = $pdo->getVisiteurId($_POST['visiteur']);

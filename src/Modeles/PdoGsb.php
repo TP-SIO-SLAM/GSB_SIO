@@ -478,6 +478,28 @@ class PdoGsb
         $requetePrepare->execute();
     }
 
+    /**
+     * @param $idVisiteur
+     * @param $mois
+     * @param $idFrais
+     * @return void
+     */
+    public function refuserFraisHorsForfait($idVisiteur, $mois, $idFrais): void {
+        $sql = "UPDATE lignefraishorsforfait 
+            SET ancien_libelle = libelle,
+                libelle = CONCAT('REFUSE : ', libelle)
+            WHERE id = :idFrais
+              AND idvisiteur = :idVisiteur
+              AND mois = :mois
+              AND libelle NOT LIKE 'REFUSE : %'";
+
+        $requete = $this->connexion->prepare($sql);
+        $requete->bindParam(':idFrais', $idFrais, PDO::PARAM_INT);
+        $requete->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requete->bindParam(':mois', $mois, PDO::PARAM_STR);
+        $requete->execute();
+    }
+
 
 
 

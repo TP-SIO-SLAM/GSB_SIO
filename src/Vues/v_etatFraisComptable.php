@@ -67,6 +67,16 @@ ini_set('display_errors', 0);
                         <button class="btn btn-danger btn-sm" type="submit">Réinitialiser</button>
                     </td>
                 </form>
+
+                <form method="POST" action="index.php?uc=gererFraisComptable&action=refuserFrais">
+                    <td class="actions">
+                        <input type="hidden" name="idFrais" value="<?php echo $fraisHors['id']; ?>">
+                        <input type="hidden" name="visiteur" value="<?php echo htmlspecialchars($visiteurLogin); ?>">
+                        <input type="hidden" name="mois" value="<?php echo htmlspecialchars($mois); ?>">
+
+                        <button class="btn btn-danger btn-sm" type="submit">Refuser</button>
+                    </td>
+                </form>
             </tr>
         <?php endforeach; ?>
         </tbody>
