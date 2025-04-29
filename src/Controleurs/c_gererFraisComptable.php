@@ -34,8 +34,10 @@ switch ($action) {
             $visiteurId = $pdo->getVisiteurId($visiteurLogin);
 
             if ($visiteurId) {
+                $montantKm = $pdo->calculerMontantKm($visiteurId, $mois);
                 $lesFraisForfait = $pdo->getLesFraisForfait($visiteurId, $mois);
                 $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($visiteurId, $mois);
+
                 include PATH_VIEWS .'v_etatFraisComptable.php';
             } else {
                 $messageErreur = "Données invalides.";

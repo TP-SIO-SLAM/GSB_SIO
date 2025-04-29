@@ -500,6 +500,66 @@ class PdoGsb
         $requete->execute();
     }
 
+    /**
+     * @param $idVisiteur
+     * @param $mois
+     * @return float|string
+     */
+    public function calculerMontantKm($idVisiteur, $mois) {
+        $sqlVehicule = "SELECT typeCarburant, puissance 
+                    FROM vehicule 
+                    WHERE idVisiteur = :idVisiteur";
+
+        $requeteVehicule = $this->connexion->prepare($sqlVehicule);
+        $requeteVehicule->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requeteVehicule->execute();
+        $vehicule = $requeteVehicule->fetch();
+
+        if (!$vehicule) return "Véhicule non renseigné";
+
+        $type = $vehicule['typeCarburant'];
+        $puissance = $vehicule['puissance'];
+
+        $baremesKm = [
+            'Diesel' => ['4CV' => 0.52, '5/6CV' => 0.58],
+            'Essence' => ['4CV' => 0.62, '5/6CV' => 0.67]
+        ];
+
+        if (!isset($baremesKm[$type][$puissance])) return "Barème non trouvé pour ce véhicule";
+
+        $tarif = $baremesKm[$type][$puissance];
+
+        $sqlKm = "SELECT quantite 
+              FROM lignefraisforfait 
+              WHERE idVisiteur = :idVisiteur 
+                AND mois = :mois 
+                AND idFraisForfait = 'KM'";
+
+        $requeteKm = $this->connexion->prepare($sqlKm);
+        $requeteKm->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requeteKm->bindParam(':mois', $mois, PDO::PARAM_STR);
+        $requeteKm->execute();
+        $ligne = $requeteKm->fetch();
+
+        if (!$ligne) return "Pas de frais KM ce mois";
+
+        $km = $ligne['quantite'];
+        $montant = $km * $tarif;
+
+        $sqlUpdate = "UPDATE lignefraisforfait 
+                  SET quantite = :montant 
+                  WHERE idVisiteur = :idVisiteur 
+                    AND mois = :mois 
+                    AND idFraisForfait = 'KM'";
+
+        $requeteUpdate = $this->connexion->prepare($sqlUpdate);
+        $requeteUpdate->bindParam(':montant', $montant);
+        $requeteUpdate->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requeteUpdate->bindParam(':mois', $mois, PDO::PARAM_STR);
+        $requeteUpdate->execute();
+
+        return $montant;
+    }
 
 
 
